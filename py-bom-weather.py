@@ -18,7 +18,7 @@ from pathlib import Path
 from typing import Deque, Dict, Iterable, List, Mapping, Optional, Tuple
 
 # Project-local layout (all files kept under ~/bin/bom/bom-weather-py)
-PROJECT_DIR = Path.home() / "bin" / "bom" / "bom-weather-py"
+PROJECT_DIR = Path.home() / "bin" / "bom" / "py-bom-weather"
 CACHE_DIR = PROJECT_DIR
 CONFIG_PATH = PROJECT_DIR / "bom_weather.config"
 
