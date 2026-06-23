@@ -155,7 +155,7 @@ def load_xml(path: Path) -> Dict[str, List[Station]]:
 
     for stn in root.findall(".//station"):
         wmo = stn.get("wmo-id")
-        name = stn.get("description") or "UNKNOWN" # get the station commonn name @description
+        name = stn.get("description") or "UNKNOWN" # get the station common name @description
         district = stn.get("forecast-district-id")
 
         # find MSL pressure under the surface level
