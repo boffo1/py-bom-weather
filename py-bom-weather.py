@@ -137,7 +137,8 @@ def fetch_xml(state: str, xml_path: Path) -> None:
         log.error(f"Failed to fetch XML from {ftp_url}: {e}")
         raise
 
-    sleep 3
+    time.sleep(3.0)   # 3 seconds
+
 # ----------------------------
 # XML PARSE (FIXED GROUPING)
 # ----------------------------
