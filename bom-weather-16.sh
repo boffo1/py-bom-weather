@@ -18,7 +18,7 @@ state="VIC"
 station_prefix=""
 target_district=""
 unit_mode=""
-no_download=false
+no_download="true" # default: do NOT download
 
 ## --- State to XML Prefix Map ---
 declare -A STATE_PREFIX=(
@@ -36,31 +36,44 @@ args=("$@")
 idx=0
 
 while [ $idx -lt ${#args[@]} ]; do
-  case "${args[$idx]}" in
+  token="${args[$idx]}"
+
+  case "$token" in
     --list|--ls)
       action="list_stations"
       ;;
+
     --list-district|--ld)
       action="list_districts"
       ;;
+
     --district|--d)
-      if [[ -n "${args[$((idx+1))]:-}" && "${args[$((idx+1))]}" != --* ]]; then
-        target_district="${args[$((idx+1))]}"
+      next="${args[$((idx+1))]:-}"
+      if [[ -n "$next" && "$next" != --* ]]; then
+        target_district="$next"
         idx=$((idx+1))
       else
         echo "Error: --district requires a district ID argument." >&2
         exit 1
       fi
       ;;
+
     --inhg|--inch-hg)
       unit_mode="--inhg"
       ;;
+
+    --download|-d)
+      no_download=false
+      ;;
+
     --no-download|--nd)
       no_download=true
       ;;
+
     --station|--st)
-      if [[ -n "${args[$((idx+1))]:-}" && "${args[$((idx+1))]}" != --* ]]; then
-        station_prefix="${args[$((idx+1))]}"
+      next="${args[$((idx+1))]:-}"
+      if [[ -n "$next" && "$next" != --* ]]; then
+        station_prefix="$next"
         action="single_station"
         idx=$((idx+1))
       else
@@ -68,29 +81,35 @@ while [ $idx -lt ${#args[@]} ]; do
         exit 1
       fi
       ;;
+
     --state)
-      if [[ -n "${args[$((idx+1))]:-}" && "${args[$((idx+1))]}" != --* ]]; then
-        state="${args[$((idx+1))]^^}"
+      next="${args[$((idx+1))]:-}"
+      if [[ -n "$next" && "$next" != --* ]]; then
+        state="${next^^}"
         idx=$((idx+1))
       else
         echo "Error: --state requires a state name argument (e.g., VIC, NSW)." >&2
         exit 1
       fi
       ;;
+
     --vic|-v) state="VIC" ;;
     --nsw|-n) state="NSW" ;;
     --qld|-q) state="QLD" ;;
     --sa|-s)  state="SA"  ;;
     --wa|-w)  state="WA"  ;;
     --tas|-t) state="TAS" ;;
-    --nt)  state="NT"  ;;
+    --nt)     state="NT"  ;;
+
     [A-Z][A-Z][A-Z]_PW[0-9][0-9][0-9])
-      target_district="${args[$idx]}"
+      target_district="$token"
       ;;
+
     *)
-      echo "Unknown option or flag ignored: ${args[$idx]}" >&2
+      echo "Unknown option or flag ignored: $token" >&2
       ;;
   esac
+
   idx=$((idx+1))
 done
 
@@ -316,7 +335,6 @@ single_station_view() {
     # Pressure + trend arrow
     if [[ -n "$mslp" && "$mslp" =~ ^[0-9.]+$ ]]; then
       history_row=$(grep "^${wmo}:" "$history_file" | head -n1 | cut -d':' -f2)
-#      history_row=$(grep "^${name}:" "$history_file" | cut -d':' -f2)
       mslp_prev=$(echo "$history_row" | cut -d',' -f1)
 
       if [[ -n "$mslp_prev" && "$mslp_prev" =~ ^[0-9.]+$ ]]; then
@@ -344,7 +362,7 @@ single_station_view() {
     echo "${name}:${updated_csv_row}" >> "${history_file}.tmp"
     echo "——————————————————————————————————————————————————————————————————————————————"
   done ## <-- ✔️ CLOSE THE WHILE LOOP
-  mv "${history_file}.tmp" "$history_file"
+#  mv "${history_file}.tmp" "$history_file"
 } ## <-- ✔️ NOW close the function
 
 ## --- Feature 3: Colorized District Summary Mode ---
@@ -445,8 +463,7 @@ xmlstarlet select -t \
 
       ## Fetch historical comma-separated data line for the station
       history_row=$(grep "^${name}:" "$history_file" | head -n1 | cut -d':' -f2)
-#      history_row=$(grep "^${name}:" "$history_file" | cut -d':' -f2)
-       ## Extract the immediate previous value (the first item before any comma)
+      ## Extract the immediate previous value (the first item before any comma)
       mslp_prev=$(echo "$history_row" | cut -d',' -f1)
 
       if [[ -n "$mslp_prev" && "$mslp_prev" =~ ^[0-9.]+$ ]]; then
@@ -493,7 +510,7 @@ xmlstarlet select -t \
          echo "$old_line" >> "${history_file}.tmp"
        fi
     done < "$history_file" 2>/dev/null
-    mv "${history_file}.tmp" "$history_file"
+#    mv "${history_file}.tmp" "$history_file"
   fi
   printf "————————————————————————————————————————————————————————————————————————————————————————\n\n"
 }
