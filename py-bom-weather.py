@@ -7,7 +7,7 @@ values per WMO station, and render a text view grouped by config.
 All project files are kept under ~/bin/bom/py-bom-weather by default.
 """
 from __future__ import annotations
-
+import time
 import argparse
 import logging
 import re
@@ -137,7 +137,7 @@ def fetch_xml(state: str, xml_path: Path) -> None:
         log.error(f"Failed to fetch XML from {ftp_url}: {e}")
         raise
 
-
+    sleep 3
 # ----------------------------
 # XML PARSE (FIXED GROUPING)
 # ----------------------------
